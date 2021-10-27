@@ -1,4 +1,6 @@
-import java.io.File;
+
+
+	
 import java.util.*;
 
 public class HangmanManager
@@ -7,7 +9,7 @@ public class HangmanManager
 	Set<Character> guesses;
 	String pattern;
 	Map<Integer,String> pat;
-	int ng = 0;
+	int ng;
 	int len;
 	public HangmanManager( List<String> dictionary, int length, int max )
 	{
@@ -26,6 +28,9 @@ public class HangmanManager
 			if(dictionary.get(i).length() == length)
 				words.add(dictionary.get(i));
 		}
+		pattern = "";
+		for(int i = 0; i <len; i++)
+			pattern += pat.get(i);
 	}
 	}
 	
@@ -46,63 +51,85 @@ public class HangmanManager
 	
 	public String pattern()
 	{
-		pattern = "";
-		for(int i = 0; i < pat.size(); i++)
-			pattern += pat.get(i);
+		
 		return pattern;
 	}
-	
+	public String getPatt(String word, String guess1) {
+		word = word.replaceAll(guess1, "!");
+		word = word.replaceAll("[a-zA-Z]", "-");
+		word = word.replaceAll("!", guess1);
+		
+		return word;
+	}
 	public int record( char guess )
 	{
+		
+		Set<String> newwords = new HashSet<String>();
 		guesses.add(guess);
-		pat.put(guess -97,Character.toString(guess));
-		ArrayList<Set<String>> sets = new ArrayList<Set<String>>();
-		for(int g = 0; g < len; g++)
-		{
-			sets.add(new HashSet<String>());
-		}
-		int count = 0;
-		System.out.println(Character.toString(guess));
+		String guess1 = Character.toString(guess);
+		String[] wordlistunedited =words.toArray(new String[words.size()]);
 		String[] wordlist =words.toArray(new String[words.size()]);
-		System.out.println(wordlist[0].substring(0,1));
 		
-		for(int i = 0; i < words.size(); i++)
+		for(int i = 0; i < wordlist.length;i++)
 		{
-			// loops through the list of words
-			
-		
-				// loops through each letter in the word
-				for(int numbere = 0; numbere < len; numbere++)
-				{
-					//loops through the word adding it to word list 1 > x depending on the number of matching leters
-					if(wordlist[i].substring(numbere,numbere+1).toLowerCase() == Character.toString(guess))
-					{
-						
-						count ++;
-						System.out.println(count + " count");
-					}
-				
-			}
-				(sets.get(count)).add(wordlist[i]);
-				count = 0;
+			wordlist[i] = wordlist[i].replaceAll(guess1, "!");
+			wordlist[i] = wordlist[i].replaceAll("[a-zA-z]", "-");
+			wordlist[i] = wordlist[i].replaceAll("!", guess1);
 		}
 		int biggest = 0;
-		int thenew = 0;
-		// gets the biggest set
-		for(int big = 0; big < sets.size();big++)
-		{
-			if(sets.get(big).size() > biggest)
+		String pat2 = "";
+		Map<String,Integer> families = new HashMap<String,Integer>();
+		
+		for(String s: wordlist) {
+			  if (!families.containsKey(s)) { 
+				  families.put(s, 1);
+				  if(families.get(s) > biggest) {
+			    	  biggest = families.get(s);
+			    	
+			    	  pat2 = s;
+				  }
+			  }
+			  else {
+			      int count = families.get(s);
+			      families.put(s, count + 1);
+			      if(families.get(s) > biggest) {
+			    	  biggest = families.get(s);
+			    	  pat2 = s;
+			      }
+			    }
+		}
+		
+		for(int h = 0; h < wordlistunedited.length; h++) {
+			if(pat2.equals(getPatt(wordlistunedited[h],guess1))) {
+				newwords.add(wordlistunedited[h]);
+			}
+		}	
+		words = newwords;
+		char[] patarray = pattern.toCharArray();
+		
+		if(pattern != pat2) {
+			
+			for(int p = 0; p < pattern.length();p++)
 			{
-				biggest = sets.get(big).size();
-				thenew = big;
+				if(pattern.substring(p,p+1).equals("-") && !pat2.substring(p,p+1).equals("-")) {
+					patarray[p] = pat2.charAt(p);
+				}
 			}
 		}
-		System.out.println(sets.get(2));
-			words =(sets.get(thenew));
-			System.out.println(words);
+		if(pat2 == pat2.replaceAll("[a-zA-Z]","-"))
+		{
+			ng--;
+		}
+		pattern = "";
+		for(char k: patarray)
+			pattern += k;
+		int count = 0;
+		for(int j = 0; j < pat2.length();j++) {
+			if(pat2.substring(j,j+1).equals(guess1)) {
+				count++;
+			}
+		}
 		
-		return biggest;
-	}
-
-	
+		return count;
+	}	
 }
